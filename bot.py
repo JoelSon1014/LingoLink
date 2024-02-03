@@ -1,12 +1,14 @@
 import os
 import discord
+from discord.ext import commands
 from discord import Intents
 from googletrans import Translator
 from config import TOKEN, GUILD, GENERAL_CHANNEL_ID
 
 intents = Intents.all()
 
-client = discord.Client(intents=intents)
+# client = discord.Client(intents=intents)
+client = commands.Bot(command_prefix='!', intents=intents)
 
 @client.event
 async def on_ready():
@@ -30,17 +32,21 @@ async def on_member_join(member):
 
 
 @client.command(name='translate', help='Translates last n number of conversations above it to a specified language')
-async def translate(num_of_lines, common_language):
-    channel = client.get_channel(GENERAL_CHANNEL_ID)
+async def translate(ctx, num_of_lines: int, common_language):
+    channel = ctx.channel
     messages = await channel.history(limit=num_of_lines).flatten()
 
     translated_messages = []
     for message in messages:
-        translated_text =  Translator.translate(message.content, dest=common_language).text 
+        translated_text = Translator().translate(message.content, dest=common_language).text
         translated_messages.append(f'{message.author}: {translated_text}')
 
     for translated_message in translated_messages:
-        print(translated_messages)
+        print(translated_message)
+
+    # Send the translated messages back to the Discord channel
+    await ctx.send('\n'.join(translated_messages))
+
 
 
 
