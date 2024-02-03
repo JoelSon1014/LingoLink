@@ -1,5 +1,6 @@
 import os
 import discord
+import asyncio
 from discord.ext import commands
 from discord import Intents
 from googletrans import Translator
@@ -34,15 +35,23 @@ async def on_member_join(member):
 @client.command(name='translate', help='Translates last n number of conversations above it to a specified language')
 async def translate(ctx, num_of_lines: int, common_language):
     channel = ctx.channel
-    messages = await channel.history(limit=num_of_lines).flatten()
+    messages = []
+    
+    async for message in channel.history(limit=num_of_lines):
+        if '!translate' in message.content:
+            print("HELLO THERE")
+            continue
+        messages.append(message)
 
     translated_messages = []
     for message in messages:
         translated_text = Translator().translate(message.content, dest=common_language).text
-        translated_messages.append(f'{message.author}: {translated_text}')
+        display = message.author.display_name
+        translated_messages.append(f'{display}: {translated_text}')
+    translated_messages.reverse() # Need to read documentation on channel history --> Leading to bugs
 
-    for translated_message in translated_messages:
-        print(translated_message)
+    # for translated_message in reversed(translated_messages):
+    #     print(translated_message)
 
     # Send the translated messages back to the Discord channel
     await ctx.send('\n'.join(translated_messages))
