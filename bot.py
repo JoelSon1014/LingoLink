@@ -34,12 +34,13 @@ async def on_member_join(member):
 
 @client.command(name='translate', help='Translates last n number of conversations above it to a specified language')
 async def translate(ctx, num_of_lines: int, common_language):
+    lines_above = num_of_lines + 1
     channel = ctx.channel
     messages = []
-    
-    async for message in channel.history(limit=num_of_lines):
-        if '!translate' in message.content:
-            print("HELLO THERE")
+    index = 0
+    async for message in channel.history(limit=lines_above):
+        index += 1
+        if '!translate' in message.content or message.author.display_name.lower() == 'lingolink':
             continue
         messages.append(message)
 
@@ -47,8 +48,10 @@ async def translate(ctx, num_of_lines: int, common_language):
     for message in messages:
         translated_text = Translator().translate(message.content, dest=common_language).text
         display = message.author.display_name
-        translated_messages.append(f'{display}: {translated_text}')
+        
+        translated_messages.append(f'**{display}**: {translated_text}') # Change display name to markup
     translated_messages.reverse() # Need to read documentation on channel history --> Leading to bugs
+    # Combine messages --> Consecutive messages by same author combine into one message, separated by punctuation
 
     # for translated_message in reversed(translated_messages):
     #     print(translated_message)

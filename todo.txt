@@ -2,6 +2,7 @@
     - We want to ignore messages like "translate! 5.." or messages from lingolink
     - We want to make the username in the translation to be their server name (e.g "Jamie" or "NOEL"), not their discord username
     - We want to print out the order of the messages in reverse order, with older messages printing out first
+    - Maybe add profile pic along with display name to better differentiate who said what
 - Add text-to-speech feature for translated text
 
 Tickets:
