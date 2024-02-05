@@ -62,11 +62,12 @@ async def translate(ctx, num_of_lines: int, common_language):
     await ctx.send('\n'.join(translated_messages))
 
 @client.command(name='speech', help='Does TTS for n number of conversations above it to a specified language')
-async def speech(ctx, spoken_lang):
+async def speech(ctx,  num_of_lines: int, spoken_lang):
     """Translates above text into the translated tts."""
+    lines = num_of_lines + 1
     channel = ctx.channel
     messages = []
-    async for message in channel.history(limit=2):
+    async for message in channel.history(limit=lines):
         if '!speech' in message.content or message.author.display_name.lower() == 'lingolink':
             continue
         messages.append(message)
@@ -74,15 +75,19 @@ async def speech(ctx, spoken_lang):
     translated_messages = []
     for message in messages:
         translated_text = Translator().translate(message.content, dest=spoken_lang).text
-        translated_messages.append(f'{translated_text}')
+        display = message.author.display_name
+        translated_messages.append(f'{display}: {translated_text}')
 
-    tts_file_path = await tts(translated_messages[0], spoken_lang, ctx.author.display_name)
+    translated_messages.reverse()
+    for translated_message in translated_messages:
+        nickname = translated_message.split(':')
+        tts_file_path = await tts(translated_message, spoken_lang, nickname)
 
     # Send the audio file to the text channel
-    await ctx.send(file=discord.File(tts_file_path))
+        await ctx.send(file=discord.File(tts_file_path))
 
     # Clean up the temporary file
-    os.remove(tts_file_path)
+        os.remove(tts_file_path)
 
 async def tts(message, spoken_lang, author):
     """Connects to AWS Polly."""
